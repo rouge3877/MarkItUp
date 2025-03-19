@@ -1,4 +1,4 @@
-# Shell-Tutorial
+# Rust Proposal Presentation
 
 The slides I made for the lab class (shell topic) when I was a teaching assistant for the ICS course.
 Fork from [hakimel/reveal.js](https://github.com/hakimel/reveal.js).
