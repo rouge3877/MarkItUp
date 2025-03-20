@@ -103,7 +103,7 @@
 
 ---
 
-### 技术目标 🔦
+### 产品目标 🔦
 
 <div class="r-grid three-col">
 <div class="fragment fade-down" data-fragment-index="1">
@@ -137,7 +137,7 @@
 
 ---
 
-### 实现结果 🚧
+### 项目目标 🚧
 
 1. 全能文件转换工具
     - 支持将 Word、Excel、PowerPoint、PDF、HTML、JSON等文件格式转换为 Markdown
