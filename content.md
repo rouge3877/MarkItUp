@@ -117,7 +117,7 @@
 <div class="fragment fade-left" data-fragment-index="2">
 
 - 智能处理能力 🧠
-    - 不只简单的格式转换,MarkItDown还能使用OCR技术从图片中提取文字!
+    - 不只简单的格式转换,MarkItUp还能使用OCR技术从图片中提取文字!
     - 音讯档案?它还能帮你做语音识别呢!
 
 </div>
