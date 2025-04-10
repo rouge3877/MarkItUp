@@ -8,10 +8,37 @@ use model::XmlToMarkdown::XmlToMarkdownConverter;
 fn main() {
     let xml = r#"
     <doc>
-        <title>Hello World</title>
+        <title>Rust XML to Markdown</title>
+        
         <section>
-            <header>Introduction</header>
-            <para>This is an example paragraph.</para>
+            <header>Getting Started</header>
+            <para>Rust is a systems programming language.</para>
+        </section>
+
+        <section>
+            <header>Features</header>
+            <list>
+                <item>Memory safety</item>
+                <item>Concurrency</item>
+                <item>Zero-cost abstractions</item>
+            </list>
+        </section>
+
+        <section>
+            <header>Example Code</header>
+            <code>fn main() {
+                    println!("Hello, world!");
+                }</code>
+        </section>
+
+        <section>
+            <header>Text Styling</header>
+            <para>This is a <bold>bold</bold> word and this is an <italic>italic</italic> word.</para>
+        </section>
+
+        <section>
+            <header>Useful Link</header>
+            <para>Visit the <link>official Rust website</link> for more info.</para>
         </section>
     </doc>
     "#;
