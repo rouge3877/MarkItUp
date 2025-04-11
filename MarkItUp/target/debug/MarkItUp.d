@@ -1,1 +1,0 @@
-/home/mqwang/study/rust/finalproj/MarkItUp/MarkItUp/target/debug/MarkItUp: /home/mqwang/study/rust/finalproj/MarkItUp/MarkItUp/src/main.rs /home/mqwang/study/rust/finalproj/MarkItUp/MarkItUp/src/model/XmlToMarkdown.rs /home/mqwang/study/rust/finalproj/MarkItUp/MarkItUp/src/model/mod.rs
