@@ -26,6 +26,28 @@ impl XmlToMarkdownConverter {
                         "header" => markdown.push_str("## "),
                         "list" => in_list = true,
                         "code" => markdown.push_str("```\n"),
+                        "underline" => markdown.push_str("<u>"),
+                        "link" => {
+                            if let Some(href) = e.attributes().find_map(|a| {
+                                a.ok().and_then(|a| {
+                                    if a.key.as_ref() == b"href" {
+                                        Some(String::from_utf8_lossy(&a.value).to_string())
+                                    } else {
+                                        None
+                                    }
+                                })
+                            }) {
+                                current_tag = format!("link:{}", href);
+                            }
+                        }
+                        "subheader" => markdown.push_str("### "),
+                        "strong" => markdown.push_str("**"),
+                        "em" => markdown.push_str("*"),
+                        "strike" => markdown.push_str("~~"),
+                        "blockquote" => markdown.push_str("> "),
+                        "hr" => markdown.push_str("\n---\n"),
+                        "inline-code" => markdown.push_str("`"),
+                        "pre" => markdown.push_str("```\n"),
                         _ => {}
                     }
                 }
@@ -38,25 +60,62 @@ impl XmlToMarkdownConverter {
                             markdown.push('\n');
                         }
                         "header" | "section" => markdown.push_str("\n\n"),
+                        "underline" => markdown.push_str("</u>"),
+                        "strong" => markdown.push_str("**"),
+                        "em" => markdown.push_str("*"),
+                        "strike" => markdown.push_str("~~"),
+                        "inline-code" => markdown.push_str("`"),
+                        "pre" => markdown.push_str("```\n\n"),
                         _ => {}
                     }
                     current_tag.clear();
                 }
                 Ok(Event::Text(e)) => {
                     let text = e.unescape()?.to_string();
-                    let line = match current_tag.as_str() {
-                        "title" => format!("# {}\n\n", text),
-                        "header" => format!("{}\n\n", text),
-                        "section" => format!("{}\n\n", text),
-                        "para" => format!("{}\n\n", text),
-                        "bold" | "b" => format!("**{}**", text),
-                        "italic" | "i" => format!("*{}*", text),
-                        "item" if in_list => format!("- {}\n", text),
-                        "code" => format!("{}\n", text),
-                        "link" => format!("[{}](#)", text),
-                        _ => format!("{}\n\n", text),
+                    let line = if current_tag.starts_with("link:") {
+                        let href = current_tag.trim_start_matches("link:");
+                        format!("[{}]({})", text, href)
+                    } else {
+                        match current_tag.as_str() {
+                            "title" => format!("# {}\n\n", text),
+                            "header" => format!("{}\n\n", text),
+                            "section" => format!("{}\n\n", text),
+                            "para" => format!("{}\n\n", text),
+                            "bold" | "b" => format!("**{}**", text),
+                            "italic" | "i" => format!("*{}*", text),
+                            "underline" => format!("{}", text),
+                            "item" if in_list => format!("- {}\n", text),
+                            "code" => format!("{}\n", text),
+                            "item" if in_list && is_ordered_list => format!("1. {}\n", text),
+                            "inline-code" => format!("{}", text),
+                            "blockquote" => format!("{}\n", text),
+                            _ => format!("{}\n\n", text),
+                        }
                     };
                     markdown.push_str(&line);
+                }
+                Ok(Event::Start(ref e)) if e.name().as_ref() == b"a" => {
+                    if let Some(href) = e.attributes().find_map(|a| {
+                        a.ok().and_then(|a| if a.key.as_ref() == b"href" {
+                            Some(String::from_utf8_lossy(&a.value).to_string())
+                        } else {
+                            None
+                        })
+                    }) {
+                        current_tag = format!("link:{}", href);
+                    }
+                }
+                Ok(Event::Empty(ref e)) if e.name().as_ref() == b"img" => {
+                    let mut src = "";
+                    let mut alt = "";
+                    for attr in e.attributes().flatten() {
+                        match attr.key.as_ref() {
+                            b"src" => src = std::str::from_utf8(&attr.value)?,
+                            b"alt" => alt = std::str::from_utf8(&attr.value)?,
+                            _ => {}
+                        }
+                    }
+                    markdown.push_str(&format!("![{}]({})\n\n", alt, src));
                 }
                 Ok(Event::Eof) => break,
                 Err(e) => return Err(Box::new(e)),
