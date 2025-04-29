@@ -2,6 +2,9 @@ use anyhow::{Context, Result};
 use std::process::Command;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::Path;
+use std::env;
+use std::io;
 
 
 fn docx_to_md_pandoc(input_path: &str, output_path: &str) -> Result<()> {

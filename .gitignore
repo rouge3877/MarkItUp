@@ -194,3 +194,17 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+#
+Audio2Markdown/target/
+Audio2Markdown/vosk-api/
+Audio2Markdown/vosk-linux-x86_64/
+*/target
+**/output/
+Audio2Markdown/models/
+Docx2Markdown/images/
+**/tests/
+**/*.md
+**/*.docx
+**/*.swp
+**/*.xml
+**/testbench/
