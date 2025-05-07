@@ -35,60 +35,81 @@ Markdown is all you need (A converter for all formats)
 ---
 
 ### `Pic2Markdown` 模块
-- 将图片转换为Markdown格式： `![image](url)`
-- 通过AI模型识别图片内容，智能提供标题
+将图片转换为Markdown格式： `![image](url)`
 
 
-<!-- <img src="./assets/arch-pic.svg" alt="arch-pic" width="40%" /> -->
+<!-- <img src="./assets/arch-pic.svg" alt="arch-pic" width="70%" /> -->
 
-<img src="./assets/pic2md.svg" alt="pic2md" width="40%" />
+
+<img src="./assets/image2md.png" alt="pic2md" width="70%" />
+
 
 ---
 
 ### `Office2Markdown` 模块
-- 将Office文档转换为Markdown格式
+将Office文档转换为Markdown格式
 
-<!-- <img src="./assets/arch-office.svg" alt="arch-office" width="40%" /> -->
 
-<img src="./assets/office2md.svg" alt="office2md" width="40%" />
+<!-- <img src="./assets/arch-office.svg" alt="arch-office" width="70%" /> -->
+
+
+<img src="./assets/docx2md.png" alt="office2md" width="70%" />
+
+---
+
+### （续）`Office2Markdown` 模块
+
+<img src="./assets/pptx2md.png" alt="office2md" width="70%" />
+
 
 ---
 
 ### `PDF2Markdown` 模块
-- 将PDF文档转换为Markdown格式
+将PDF文档转换为Markdown格式
 
-<!-- <img src="./assets/arch-pdf.svg" alt="arch-pdf" width="40%" /> -->
 
-<img src="./assets/pdf2md.svg" alt="pdf2md" width="40%" />
+<!-- <img src="./assets/arch-pdf.svg" alt="arch-pdf" width="70%" /> -->
+
+
+
+<img src="./assets/pdf2md.png" alt="pdf2md" width="70%" />
+
+
 
 ---
 
 ### `HTML2Markdown` 模块
-- 将HTML文档转换为Markdown格式
+将HTML文档转换为Markdown格式
 
-<!-- <img src="./assets/arch-ml.svg" alt="arch-ml" width="40%" /> -->
 
-<img src="./assets/html2md.svg" alt="html2md" width="40%" />
+<!-- <img src="./assets/arch-ml.svg" alt="arch-ml" width="70%" /> -->
+
+
+<img src="./assets/html2md.png" alt="html2md" width="70%" />
+
 
 ---
 
 ### `XML2Markdown` 模块
-- 将XML文档转换为Markdown格式
-- Office2Markdown模块的核心实现
+将XML文档转换为Markdown格式, 是Office2Markdown模块的核心实现
 
-<!-- <img src="./assets/arch-ml.svg" alt="arch-xml" width="40%" /> -->
 
-<img src="./assets/xml2md.svg" alt="xml2md" width="40%" />
+<!-- <img src="./assets/arch-ml.svg" alt="arch-xml" width="70%" /> -->
+
+
+<img src="./assets/xml2md.png" alt="xml2md" width="70%" />
 
 
 ---
 
 ### `Audio2Markdown` 模块
-- 将音频文件转换为Markdown格式(MetaData + Transcription)
+将音频文件转换为Markdown格式(MetaData + Transcription)
 
-<!-- <img src="./assets/arch-audio.svg" alt="arch-audio" width="40%" /> -->
 
-<img src="./assets/audio2md.svg" alt="audio2md" width="40%" />
+<!-- <img src="./assets/arch-audio.svg" alt="arch-audio" width="70%" /> -->
+
+<img src="./assets/audio2md.png" alt="audio2md" width="70%" />
+
 
 ------
 
