@@ -1,2 +1,0 @@
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
-     Running `target/debug/Image2Base64 --input /home/mqwang/study/machinelearning/lab1/output1.png --output /dev/tty`

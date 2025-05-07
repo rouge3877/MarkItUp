@@ -16,6 +16,7 @@ impl XmlToMarkdownConverter {
         let mut markdown = String::new();
         let mut current_tag = String::new();
         let mut in_list = false;
+        let mut is_ordered_list = false;
 
         loop {
             match reader.read_event_into(&mut buf) {
@@ -106,16 +107,28 @@ impl XmlToMarkdownConverter {
                     }
                 }
                 Ok(Event::Empty(ref e)) if e.name().as_ref() == b"img" => {
-                    let mut src = "";
-                    let mut alt = "";
+                    let mut src = String::new();
+                    let mut alt = String::new();
+
                     for attr in e.attributes().flatten() {
                         match attr.key.as_ref() {
-                            b"src" => src = std::str::from_utf8(&attr.value)?,
-                            b"alt" => alt = std::str::from_utf8(&attr.value)?,
+                            b"src" => src = String::from_utf8_lossy(&attr.value).to_string(),
+                            b"alt" => alt = String::from_utf8_lossy(&attr.value).to_string(),
                             _ => {}
                         }
                     }
                     markdown.push_str(&format!("![{}]({})\n\n", alt, src));
+                }
+                Ok(Event::Empty(ref e)) if e.name().as_ref() == b"graphic" => {
+                    let mut href = String::new();
+                    for attr in e.attributes().flatten() {
+                        if attr.key.as_ref() == b"xlink:href" {
+                            href = String::from_utf8_lossy(&attr.value).to_string();
+                        }
+                    }
+                    if !href.is_empty() {
+                        markdown.push_str(&format!("![]({})\n\n", href));
+                    }
                 }
                 Ok(Event::Eof) => break,
                 Err(e) => return Err(Box::new(e)),
