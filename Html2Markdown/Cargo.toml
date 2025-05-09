@@ -1,0 +1,9 @@
+[package]
+name = "Html2Markdown"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+html2md ="0.2.14"
+reqwest={version ="0.11",features=["blocking"]}
+clap = { version = "4.0", features = ["derive"] }
