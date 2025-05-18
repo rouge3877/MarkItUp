@@ -122,7 +122,9 @@ impl XmlToMarkdownConverter {
                 Ok(Event::Empty(ref e)) if e.name().as_ref() == b"graphic" => {
                     let mut href = String::new();
                     for attr in e.attributes().flatten() {
-                        if attr.key.as_ref() == b"xlink:href" {
+                        // 针对可能带命名空间的 "href"，例如 "xlink:href"
+                        let key = attr.key.as_ref();
+                        if key.ends_with(b"href") {
                             href = String::from_utf8_lossy(&attr.value).to_string();
                         }
                     }
