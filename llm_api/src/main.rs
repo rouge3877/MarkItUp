@@ -3,7 +3,7 @@ use serde_json::json;
 use serde_json::Value;
 
 fn main() {
-    let api_key = "sk-251c110d2ce44b5b93e3618d3df0dc90";
+    let api_key = "";
     let client = Client::new();
 
     let input_text = "Rust 是一种系统编程语言，专注于安全性、并发性和性能。";
