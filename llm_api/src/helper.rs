@@ -136,14 +136,14 @@ pub async fn send_api_post(client:&Client, url: &str, payload: &impl serde::Seri
   Ok(response)
 }
 
-#[tokio::main]
-async fn main()-> Result<(), Box<dyn std::error::Error>>{
-  let client = Client::new();
-  let url = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
-  let mut request = SendMessage::new("doubao-1.5-vision-pro-32k-250115".to_string(), None, None);
-  //后面加你要的上下文
-  let response = send_api_post(&client, url, &request).await?;
-  println!("Response: {:?}", response);
-  Ok(())
-  //详情见官网示例：https://www.volcengine.com/docs/82379/1494384?redirect=1#%E8%AF%B7%E6%B1%82%E7%A4%BA%E4%BE%8B
-}
+// #[tokio::main]
+// async fn main()-> Result<(), Box<dyn std::error::Error>>{
+//   let client = Client::new();
+//   let url = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+//   let mut request = SendMessage::new("doubao-1.5-vision-pro-32k-250115".to_string(), None, None);
+//   //后面加你要的上下文
+//   let response = send_api_post(&client, url, &request).await?;
+//   println!("Response: {:?}", response);
+//   Ok(())
+//   //详情见官网示例：https://www.volcengine.com/docs/82379/1494384?redirect=1#%E8%AF%B7%E6%B1%82%E7%A4%BA%E4%BE%8B
+// }
