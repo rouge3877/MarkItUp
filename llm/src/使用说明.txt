@@ -1,0 +1,9 @@
+运行方式:
+main.rs 
+180行改为图片路径
+171行改为模型id
+
+命令行:
+$Env:DOUBAO_API_KEY=""
+>> cargo run
+
