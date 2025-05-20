@@ -133,6 +133,11 @@ pub async fn send_api_post(
 ) -> Result<Response, Box<dyn std::error::Error>> {
     let key = env::var("DOUBAO_API_KEY")
         .expect("请先设置环境变量 DOUBAO_API_KEY");
+
+    //显示传入:
+    //let key = "你的真实API_KEY字符串";
+    //这样运行只需要cargo run即可
+
     let res = client
         .post(url)
         .header("Content-Type", "application/json")
