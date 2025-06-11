@@ -25,6 +25,10 @@ fn get_file_type_from_extension(file_path: &Option<String>) -> Option<&'static s
         "jpg" | "jpeg" => Some("image/jpeg"),
         "png" => Some("image/png"),
         "gif" => Some("image/gif"),
+        "webp" => Some("image/webp"),
+        "bmp" => Some("image/bmp"),
+        "tiff" => Some("image/tiff"),
+        "ico" => Some("image/x-icon"),
         "html" | "htm" => Some("text/html"),
         "pdf" => Some("application/pdf"),
         "mp3" => Some("audio/mpeg"),
@@ -91,6 +95,14 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
         "image/jpeg" | "image/png" | "image/gif" => {
             generator::image2md::run(&file.file_stream)
                 .map_err(|e| format!("Failed to convert image: {}", e))
+        }
+        // more image formats can be added here
+        "image/webp" | "image/bmp" | "image/tiff" | "image/ico" => {
+            let png_data = converter::image2png::image_to_png(&file.file_stream)
+                .map_err(|e| format!("Failed to convert image to PNG: {}", e))?;
+            
+            generator::image2md::run(&png_data)
+                .map_err(|e| format!("Failed to convert PNG image: {}", e))
         }
         "application/vnd.openxmlformats-officedocument.presentationml.presentation" => {
             generator::pptx2md::run(&file.file_stream)
