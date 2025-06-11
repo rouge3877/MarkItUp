@@ -43,3 +43,10 @@ symphonia = { version = "0.5", features = ["all"] }
 # for pdf
 lopdf = "0.36.0"
 calamine = "0.25.0"
+
+#for gui
+eframe="0.27.0"
+egui="0.27.2"
+rfd="0.12.1"
+pulldown-cmark="0.11.0"
+egui_commonmark = "0.14.0"
