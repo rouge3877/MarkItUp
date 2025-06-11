@@ -95,10 +95,10 @@ impl Default for UIFramework{
             right_panel_mode: RightPanelMode::default(),
             markdown_cache: egui_commonmark::CommonMarkCache::default(),
 
-            font_size_heading:25.0,
+            font_size_heading:22.0,
             font_size_body:18.0,
-            background_color:egui::Color32::from_rgb(27, 27, 27),
-            text_color: egui::Color32::WHITE,
+            background_color:egui::Color32::from_rgb(60, 55, 50),
+            text_color: egui::Color32::from_rgb(240,240,230),
             convert_state: Arc::new(Mutex::new(ConvertState::Idle)), 
             egui_ctx: egui::Context::default(),
 
@@ -259,8 +259,12 @@ impl eframe::App for UIFramework{
                     egui::ScrollArea::vertical().show(ui,|ui|{
                         match self.right_panel_mode{
                             RightPanelMode::Preview =>{
-                                let viewer = CommonMarkViewer::new("markdown_viewer_unique_id");
-                                viewer.show(ui, &mut self.markdown_cache, &self.current_markdown_content);
+                                let available_size = ui.available_size();
+                                egui::Frame::none()
+                                    .show(ui,|frame_ui|{
+                                        let viewer = CommonMarkViewer::new("markdown_viewer_unique_id");
+                                        viewer.show(frame_ui, &mut self.markdown_cache, &self.current_markdown_content);
+                                    });
                             }
                             RightPanelMode::Editor =>{
                                 ui.add(
@@ -323,9 +327,10 @@ impl eframe::App for UIFramework{
                     ui.add_space(10.0);
 
                     if ui.button("Apply Settings").clicked(){
-                        config::set_is_ai_enpower(self.config_choice);
-                        config::set_deepseek_api_key(self.config_first_input);
-                        config::set_doubao_api_key(self.config_second_input);
+                       println!("asfawef");
+                       // config::set_is_ai_enpower(self.config_choice.clone());
+                       // config::set_deepseek_api_key(self.config_first_input.clone());
+                       // config::set_doubao_api_key(self.config_second_input.clone());
                     }
             });
         });
