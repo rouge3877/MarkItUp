@@ -52,42 +52,30 @@ cp vosk/lib/vosk-win64-0.3.45/lib* target/release/
 [tasks.build]
 description = "Compile the project (debug)"
 dependencies = ["copy-vosk-libs"]
+condition = { files_modified = { input = ["src/**/*", "vosk/**/*", "Cargo.toml", "Config.toml"], output = ["target/debug/markitup-cli"] } }
 command = "cargo"
 args = ["build"]
 
-
-[tasks.run-wav]
-description = "Run the project with a WAV file"
-dependencies = ["build"]
+[tasks.release]
+description = "Compile the project (release)"
+dependencies = ["copy-vosk-libs"]
+condition = { files_modified = { input = ["src/**/*", "vosk/**/*", "Cargo.toml", "Config.toml"], output = ["target/release/markitup-cli"] } }
 command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.wav"]
+args = ["build", "--release"]
 
-[tasks.run-docx]
-description = "Run the project with a DOCX file"
-dependencies = ["build"]
-command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.docx"]
 
-[tasks.run-image]
-description = "Run the project with an image file"
+[tasks.run]
+description = "Run the project with a specified file"
 dependencies = ["build"]
-command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.jpg"]
+script_runner = "@shell"
+script = '''
+if [ $# -eq 0 ]; then
+    echo "Available test file types:"
+    find bench/ -type f -name "*.*" | sed 's/.*\.//' | sort -u | sed 's/^/  /'
+    echo ""
+    echo "Usage: cargo make run <file_extension>"
+else
+    cargo run --bin markitup-cli -- "bench/test.$1"
+fi
+'''
 
-[tasks.run-pptx]
-description = "Run the project with a PPTX file"
-dependencies = ["build"]
-command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.pptx"]
-
-[tasks.run-xlsx]
-description = "Run the project with an XLSX file"
-dependencies = ["build"]
-command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.xlsx"]
-
-[tasks.run-csv]
-description = "Run the project with a CSV file"
-dependencies = ["build"]
-command = "cargo"
-args = ["run", "--bin", "markitup", "--", "bench/test.csv"]
