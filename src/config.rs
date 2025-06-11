@@ -52,6 +52,30 @@ pub static SETTINGS: Lazy<RwLock<Settings>> = Lazy::new(|| {
     RwLock::new(settings)
 });
 
+pub fn set_is_ai_enpower(enable: bool) {
+    let mut settings = SETTINGS.write().unwrap();
+    settings.is_ai_entitle = enable;
+    settings.is_ai_sweep = enable; // Assuming is_ai_sweep should also be updated
+
+    debug_print_settings(&settings);
+}
+
+pub fn set_deepseek_api_key(key: Option<String>) {
+    let mut settings = SETTINGS.write().unwrap();
+    settings.deepseek_api_key = key;
+
+    // Debug output after setting the key
+    debug_print_settings(&settings);
+}
+
+pub fn set_doubao_api_key(key: Option<String>) {
+    let mut settings = SETTINGS.write().unwrap();
+    settings.doubao_api_key = key;
+
+    // Debug output after setting the key
+    debug_print_settings(&settings);
+}
+
 // 提供一个便捷的访问函数，保持原有的使用方式
 pub fn get_settings() -> Settings {
     SETTINGS.read().unwrap().clone()
