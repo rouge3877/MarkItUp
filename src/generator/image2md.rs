@@ -44,7 +44,7 @@ pub fn run_with_mode(file_stream: &[u8], mode: ImageProcessingMode) -> Result<St
         ("image/jpeg".to_string(), "jpg")
     };
 
-    let image_name = if cfg.is_ai_enpower {
+    let image_name = if cfg.is_ai_entitle {
         ai_generate_name_from_bytes(file_stream, &mime_type)
     } else {
         // generate a timestamp-based name

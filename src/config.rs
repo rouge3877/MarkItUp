@@ -19,8 +19,25 @@ pub struct Settings {
     pub model_path: PathBuf,
     pub image_path: PathBuf,
     pub output_path: Option<PathBuf>,
-    pub is_ai_enpower: bool,
+    pub is_ai_entitle: bool,
     pub doubao_api_key: Option<String>,
+    pub is_ai_sweep: bool,
+    pub deepseek_api_key: Option<String>,
+}
+
+// debug print settings
+fn debug_print_settings(settings: &Settings) {
+    if cfg!(debug_assertions) {
+        eprintln!("=== Configuration Settings ===");
+        eprintln!("model_path: {:?}", settings.model_path);
+        eprintln!("image_path: {:?}", settings.image_path);
+        eprintln!("output_path: {:?}", settings.output_path);
+        eprintln!("is_ai_entitle: {}", settings.is_ai_entitle);
+        eprintln!("doubao_api_key: {:?}", settings.doubao_api_key.as_ref());
+        eprintln!("is_ai_sweep: {}", settings.is_ai_sweep);
+        eprintln!("deepseek_api_key: {:?}", settings.deepseek_api_key.as_ref());
+        eprintln!("==============================");
+    }
 }
 
 pub static SETTINGS: Lazy<RwLock<Settings>> = Lazy::new(|| {
@@ -30,15 +47,7 @@ pub static SETTINGS: Lazy<RwLock<Settings>> = Lazy::new(|| {
     });
     
     // Debug output for all configuration settings
-    if cfg!(debug_assertions) {
-        println!("=== Configuration Settings ===");
-        println!("model_path: {:?}", settings.model_path);
-        println!("image_path: {:?}", settings.image_path);
-        println!("output_path: {:?}", settings.output_path);
-        println!("is_ai_enpower: {}", settings.is_ai_enpower);
-        println!("doubao_api_key: {:?}", settings.doubao_api_key.as_ref());
-        println!("==============================");
-    }
+    debug_print_settings(&settings);
     
     RwLock::new(settings)
 });
@@ -65,19 +74,16 @@ pub fn update_settings_with_cli_args(
     }
 
     if let Some(enable) = ai_enable {
-        settings.is_ai_enpower = enable;
+        settings.is_ai_entitle = enable;
+        settings.is_ai_sweep = enable; // Assuming is_ai_sweep should also be updated
+    } else {
+        // 如果没有提供 ai_enable 参数，则一律disable AI功能
+        settings.is_ai_entitle = false;
+        settings.is_ai_sweep = false;
     }
     
     // Debug output after CLI updates
-    if cfg!(debug_assertions) {
-        println!("=== Updated Configuration Settings ===");
-        println!("model_path: {:?}", settings.model_path);
-        println!("image_path: {:?}", settings.image_path);
-        println!("output_path: {:?}", settings.output_path);
-        println!("is_ai_enpower: {}", settings.is_ai_enpower);
-        println!("doubao_api_key: {:?}", settings.doubao_api_key.as_ref());
-        println!("=====================================");
-    }
+    debug_print_settings(&settings);
 }
 
 impl Settings {

@@ -2,6 +2,7 @@ use infer;
 pub mod config;
 pub mod generator;
 pub mod converter;
+use config::{SETTINGS};
 
 pub struct ConverterFile {
     pub file_path: Option<String>,
@@ -62,7 +63,7 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
         dbg!(mime_type);
     }
 
-    match mime_type {
+    let markdown = match mime_type {
         "audio/x-wav" | "audio/wav" | "audio/wave" | "audio/mpeg" | "audio/mp3" | "audio/flac" | "audio/ogg" | "audio/aac" | "audio/x-m4a" => {
             // Convert other audio formats to WAV first
             let wav_data = converter::audio2wav::audio_to_wav(&file.file_stream)
@@ -154,6 +155,13 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
                 .map_err(|e| format!("Failed to convert HTML: {}", e))
         }
         _ => Err(format!("Unsupported file type: {}", mime_type)),
+    };
+
+    let cfg = &*SETTINGS.read().unwrap();
+    if cfg.is_ai_sweep {
+        ai_sweep(markdown)
+    } else {
+        markdown
     }
 }
 
@@ -167,4 +175,223 @@ pub fn convert_from_path(file_path: &str) -> Result<String, String> {
     };
 
     convert(file)
+}
+
+fn ai_sweep(markdown: Result<String, String>) -> Result<String, String> {
+    let markdown_content = markdown?;
+    
+    // Check if the markdown contains base64 encoded images
+    if contains_base64_images(&markdown_content) {
+        if cfg!(debug_assertions) {
+            eprintln!("Detected base64 images in markdown, skipping AI sweep");
+        }
+        return Ok(markdown_content);
+    }
+    
+    let cfg = &*SETTINGS.read().unwrap();
+    let api_key = cfg.deepseek_api_key.as_ref()
+        .ok_or_else(|| "DeepSeek API key is not configured".to_string())?;
+    
+    format_markdown_with_deepseek(&markdown_content, api_key)
+}
+
+fn contains_base64_images(markdown: &str) -> bool {
+    // Check for common base64 image patterns in markdown
+    let base64_patterns = [
+        "data:image/png;base64,",
+        "data:image/jpg;base64,",
+        "data:image/jpeg;base64,",
+        "data:image/gif;base64,",
+        "data:image/webp;base64,",
+        "data:image/bmp;base64,",
+        "data:image/svg+xml;base64,",
+    ];
+    
+    for pattern in &base64_patterns {
+        if markdown.contains(pattern) {
+            return true;
+        }
+    }
+    
+    // Also check for markdown image syntax with base64 data URLs
+    if markdown.contains("![") && markdown.contains("data:image/") && markdown.contains("base64,") {
+        return true;
+    }
+    
+    false
+}
+
+fn create_format_prompt(markdown: &str) -> String {
+    format!(
+        "Please format and fix the markdown below. Only fix formatting issues like spacing, alignment, and markdown syntax. Do not modify any content, structure, or meaning. Return ONLY the formatted markdown content without any explanations, comments, or additional text. Even \"```markdown\" and \"```\" are not allowed output:\n\n{}",
+        markdown
+    )
+}
+
+fn format_markdown_with_deepseek(markdown: &str, api_key: &str) -> Result<String, String> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(60))
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+    
+    let prompt = create_format_prompt(markdown);
+    
+    // 对 content 进行预处理，确保 JSON 安全
+    let escaped_content = escape_json_string(&prompt);
+    
+    // 直接构造 JSON 字符串
+    let json_payload = format!(
+        r#"{{
+            "model": "deepseek-chat",
+            "messages": [
+                {{
+                    "role": "user",
+                    "content": "{}"
+                }}
+            ],
+            "max_tokens": 8192,
+            "temperature": 0.1
+        }}"#,
+        escaped_content
+    );
+
+    if cfg!(debug_assertions) {
+        eprintln!("Sending request to DeepSeek API...");
+        eprintln!("Payload length: {} bytes", json_payload.len());
+    }
+
+    let response = client
+        .post("https://api.deepseek.com/chat/completions")
+        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Content-Type", "application/json")
+        .body(json_payload)
+        .send()
+        .map_err(|e| format!("Failed to send request: {}", e))?;
+
+    let status = response.status();
+    let response_text = response.text()
+        .map_err(|e| format!("Failed to read response: {}", e))?;
+
+    if cfg!(debug_assertions) {
+        eprintln!("Response status: {}", status);
+        if response_text.len() < 2000 {
+            eprintln!("Full response: {}", response_text);
+        } else {
+            eprintln!("Response preview (first 1000 chars): {}", &response_text[..1000]);
+        }
+    }
+
+    if !status.is_success() {
+        return Err(format!("API error ({}): {}", status, response_text));
+    }
+
+    // 提取 content
+    extract_deepseek_content(&response_text)
+}
+
+fn escape_json_string(s: &str) -> String {
+    s.chars()
+        .map(|c| match c {
+            '"' => "\\\"".to_string(),
+            '\\' => "\\\\".to_string(),
+            '\n' => "\\n".to_string(),
+            '\r' => "\\r".to_string(),
+            '\t' => "\\t".to_string(),
+            '\u{08}' => "\\b".to_string(),
+            '\u{0C}' => "\\f".to_string(),
+            c if c.is_control() => format!("\\u{:04x}", c as u32),
+            c => c.to_string(),
+        })
+        .collect()
+}
+
+fn extract_deepseek_content(response_text: &str) -> Result<String, String> {
+    // 首先尝试解析为 JSON
+    if let Ok(json) = serde_json::from_str::<serde_json::Value>(response_text) {
+        // 标准 OpenAI 格式
+        if let Some(choices) = json["choices"].as_array() {
+            if let Some(first_choice) = choices.first() {
+                if let Some(content) = first_choice["message"]["content"].as_str() {
+                    return Ok(content.to_string());
+                }
+            }
+        }
+    }
+
+    // 如果 JSON 解析失败，使用字符串匹配
+    // 查找 "content":"..." 模式
+    if let Some(start) = response_text.find(r#""content":"#) {
+        let content_start = start + 11; // "content":" 的长度
+        let remaining = &response_text[content_start..];
+        
+        // 找到内容的结束位置，需要正确处理转义字符
+        if let Some(content_end) = find_json_string_end(remaining) {
+            let raw_content = &remaining[..content_end];
+            // 解码 JSON 转义字符
+            let decoded = decode_json_string(raw_content);
+            return Ok(decoded);
+        }
+    }
+
+    Err(format!("Could not extract content from DeepSeek response. Response length: {} bytes", response_text.len()))
+}
+
+fn find_json_string_end(s: &str) -> Option<usize> {
+    let chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    
+    while i < chars.len() {
+        match chars[i] {
+            '"' => return Some(i), // 找到结束引号
+            '\\' => {
+                // 跳过转义字符
+                i += 2;
+            }
+            _ => i += 1,
+        }
+    }
+    
+    None
+}
+
+fn decode_json_string(s: &str) -> String {
+    let mut result = String::new();
+    let chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    
+    while i < chars.len() {
+        if chars[i] == '\\' && i + 1 < chars.len() {
+            match chars[i + 1] {
+                'n' => result.push('\n'),
+                'r' => result.push('\r'),
+                't' => result.push('\t'),
+                '"' => result.push('"'),
+                '\\' => result.push('\\'),
+                '/' => result.push('/'),
+                'b' => result.push('\u{08}'),
+                'f' => result.push('\u{0C}'),
+                'u' if i + 5 < chars.len() => {
+                    // Unicode 转义 \uXXXX
+                    let hex: String = chars[i+2..i+6].iter().collect();
+                    if let Ok(code) = u32::from_str_radix(&hex, 16) {
+                        if let Some(unicode_char) = std::char::from_u32(code) {
+                            result.push(unicode_char);
+                        }
+                    }
+                    i += 6;
+                    continue;
+                }
+                c => {
+                    result.push('\\');
+                    result.push(c);
+                }
+            }
+            i += 2;
+        } else {
+            result.push(chars[i]);
+            i += 1;
+        }
+    }
+    
+    result
 }

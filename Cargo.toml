@@ -34,7 +34,7 @@ ooxml = "0.2.8"
 
 # for html
 html2md ="0.2.14"
-reqwest={version ="0.11",features=["blocking"]}
+reqwest = { version = "0.11", features = ["blocking", "json"] }
 clap = { version = "4.0", features = ["derive"] }
 
 # for audio

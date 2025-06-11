@@ -1,4 +1,6 @@
 model_path = "vosk/models/vosk-model-en-us"
 image_path = ""
-is_ai_enpower = true
 doubao_api_key = ""
+deepseek_api_key = ""
+is_ai_entitle = false
+is_ai_sweep = false
