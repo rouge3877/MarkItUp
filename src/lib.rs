@@ -26,6 +26,7 @@ fn get_file_type_from_extension(file_path: &Option<String>) -> Option<&'static s
         "png" => Some("image/png"),
         "gif" => Some("image/gif"),
         "html" | "htm" => Some("text/html"),
+        "pdf" => Some("application/pdf"),
         _ => None,
     }
 }
@@ -108,6 +109,10 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
         "text/csv" | "application/csv" => {
             generator::csv2md::run(&file.file_stream)
                 .map_err(|e| format!("Failed to convert CSV: {}", e))
+        }
+        "application/pdf" => {
+            generator::pdf2md::run(&file.file_stream)
+                .map_err(|e| format!("Failed to convert PDF: {}", e))
         }
         "text/html" => {
             generator::html2md::run(&file.file_stream)

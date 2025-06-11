@@ -38,3 +38,7 @@ clap = { version = "4.0", features = ["derive"] }
 
 # for audio
 symphonia = { version = "0.5", features = ["all"] }
+
+# for pdf
+lopdf = "0.36.0"
+calamine = "0.25.0"
