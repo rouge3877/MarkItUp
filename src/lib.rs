@@ -27,6 +27,15 @@ fn get_file_type_from_extension(file_path: &Option<String>) -> Option<&'static s
         "gif" => Some("image/gif"),
         "html" | "htm" => Some("text/html"),
         "pdf" => Some("application/pdf"),
+        "mp3" => Some("audio/mpeg"),
+        "flac" => Some("audio/flac"),
+        "ogg" => Some("audio/ogg"),
+        "aac" => Some("audio/aac"),
+        "m4a" => Some("audio/x-m4a"),
+        "mp4" => Some("video/mp4"),
+        "webm" => Some("video/webm"),
+        "avi" => Some("video/avi"),
+        "mpeg" => Some("video/mpeg"),
         _ => None,
     }
 }
@@ -66,6 +75,14 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
             
             generator::wav2md::run(&wav_data)
                 .map_err(|e| format!("Failed to convert WAV: {}", e))
+        }
+        // All kind of video formats, transform to wav
+        "video/mp4" | "video/x-matroska" | "video/webm" | "video/avi" | "video/mpeg" => {
+            let wav_data = converter::video2wav::video_to_wav(&file.file_stream)
+                .map_err(|e| format!("Failed to convert video to WAV: {}", e))?;
+            
+            generator::wav2md::run(&wav_data)
+                .map_err(|e| format!("Failed to convert WAV from video: {}", e))
         }
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => {
             generator::docx2md::run(&file.file_stream)
