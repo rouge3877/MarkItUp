@@ -1,4 +1,4 @@
-use image::{ImageFormat, DynamicImage};
+use image::ImageFormat;
 use std::io::Cursor;
 
 /// Convert various image formats to PNG format
@@ -65,7 +65,6 @@ pub fn image_to_png(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
     
     #[test]
     fn test_png_passthrough() {

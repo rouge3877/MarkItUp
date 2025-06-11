@@ -63,11 +63,7 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
     }
 
     match mime_type {
-        "audio/x-wav" | "audio/wav" | "audio/wave" => {
-            generator::wav2md::run(&file.file_stream)
-                .map_err(|e| format!("Failed to convert WAV: {}", e))
-        }
-        "audio/mpeg" | "audio/mp3" | "audio/flac" | "audio/ogg" | "audio/aac" | "audio/x-m4a" => {
+        "audio/x-wav" | "audio/wav" | "audio/wave" | "audio/mpeg" | "audio/mp3" | "audio/flac" | "audio/ogg" | "audio/aac" | "audio/x-m4a" => {
             // Convert other audio formats to WAV first
             let wav_data = converter::audio2wav::audio_to_wav(&file.file_stream)
                 .map_err(|e| format!("Failed to convert audio to WAV: {:?}", e))?;
@@ -82,10 +78,20 @@ pub fn convert(file: ConverterFile) -> Result<String, String> {
         }
         // All kind of video formats, transform to wav
         "video/mp4" | "video/x-matroska" | "video/webm" | "video/avi" | "video/mpeg" => {
+            if cfg!(debug_assertions) {
+                dbg!(file.file_stream.len());
+            }
             let wav_data = converter::video2wav::video_to_wav(&file.file_stream)
                 .map_err(|e| format!("Failed to convert video to WAV: {}", e))?;
-            
-            generator::wav2md::run(&wav_data)
+            if cfg!(debug_assertions) {
+                dbg!(wav_data.len());
+            }
+            let _wav_data = converter::audio2wav::audio_to_wav(&wav_data)
+                .map_err(|_| format!("Failed to convert video WAV to standard WAV"))?;
+            if cfg!(debug_assertions) {
+                dbg!(_wav_data.len());
+            }
+            generator::wav2md::run(&_wav_data)
                 .map_err(|e| format!("Failed to convert WAV from video: {}", e))
         }
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => {
