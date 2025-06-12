@@ -45,9 +45,10 @@ enum WorkerMessage {
 }
 
 fn replace_base64_in_markdown(markdown:&str) ->String{
-    let re = Regex::new(r"\((data:image/[^;]+;base64,[^)]+)\)").unwrap();
-    re.replace_all(markdown, "(base64_image_placeholder)").into_owned()
+    let re = regex::Regex::new(r"!\[.*?\]\(.*?\)|!\[.*?\]\[.*?\]|<img[^>]*?>").unwrap();
+    re.replace_all(markdown, "[A figure]").to_string()
 }
+
 
 pub struct UIFramework{
     show_config_panel:bool,
@@ -123,6 +124,9 @@ impl eframe::App for UIFramework{
                     // 如果收到了成功转换的消息
                     self.current_markdown_content = full_markdown; // 更新完整 Markdown 内容
                     self.editor_display_content = display_markdown; // 更新编辑器显示内容
+                    if self.editor_display_content==String::from(""){
+                        self.editor_display_content=String::from("Nothing to show");
+                    }
                     *state_guard = ConvertState::Idle; // 转换完成，将状态重置为 Idle
                     // 注意：这里将状态重置为 Idle，以便在下一次更新中可以显示最终内容，
                     // 而不是一直显示 "Done" 状态。
@@ -262,13 +266,14 @@ impl eframe::App for UIFramework{
                                 let available_size = ui.available_size();
                                 egui::Frame::none()
                                     .show(ui,|frame_ui|{
+
                                         let viewer = CommonMarkViewer::new("markdown_viewer_unique_id");
-                                        viewer.show(frame_ui, &mut self.markdown_cache, &self.current_markdown_content);
+                                        viewer.show(frame_ui, &mut self.markdown_cache, &self.editor_display_content);
                                     });
                             }
                             RightPanelMode::Editor =>{
                                 ui.add(
-                                    egui::TextEdit::multiline(&mut self.current_markdown_content)
+                                    egui::TextEdit::multiline(&mut self.editor_display_content)
                                         .desired_width(f32::INFINITY) // 宽度填充可用空间
                                         .desired_rows(20) // 默认高度（行数）
                                       );
@@ -327,10 +332,10 @@ impl eframe::App for UIFramework{
                     ui.add_space(10.0);
 
                     if ui.button("Apply Settings").clicked(){
-                       println!("asfawef");
-                       // config::set_is_ai_enpower(self.config_choice.clone());
-                       // config::set_deepseek_api_key(self.config_first_input.clone());
-                       // config::set_doubao_api_key(self.config_second_input.clone());
+                       //println!("asfawef");
+                        config::set_is_ai_enpower(self.config_choice.clone());
+                        config::set_deepseek_api_key(self.config_first_input.clone());
+                        config::set_doubao_api_key(self.config_second_input.clone());
                     }
             });
         });
