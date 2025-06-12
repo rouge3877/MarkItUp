@@ -378,7 +378,7 @@ impl UIFramework{
         let mut fonts= egui::FontDefinitions::default();
         fonts.font_data.insert(
             "my_custom_font".to_owned(), // Give your font a unique name within egui
-            egui::FontData::from_static(include_bytes!("../../font.ttf")), // Adjust path as needed
+            egui::FontData::from_static(include_bytes!("../font.ttf")), // Adjust path as needed
         );
             fonts.families.get_mut(&egui::FontFamily::Proportional)
                 .unwrap()
